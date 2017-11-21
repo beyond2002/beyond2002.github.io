@@ -50,10 +50,12 @@ cache:
   - ci/linux-4.13
 
 script:
-  - if [ ${COVERITY_SCAN_BRANCH} != 1 ];
+ travis_fold start "build"
+ - if [ ${COVERITY_SCAN_BRANCH} != 1 ];
         then ci/build-all-configs.sh;
     fi
-
+ travis_fold end "build"
+ 
 addons:
   coverity_scan:
     project:
