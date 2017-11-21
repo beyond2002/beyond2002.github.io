@@ -58,12 +58,14 @@ addons:
     build_command: "unused"
     branch_pattern: coverity_scan.*
 
-travis_fold:start:dp
+travis_fold start "deploy.part1"
+  travis_time_start
 deploy:
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
   on:
     branch: tmp
-travis_fold:end:dp
+  travis_time_finish
+travis_fold end "deploy.part1" 
 
