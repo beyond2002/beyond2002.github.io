@@ -50,11 +50,11 @@ cache:
   - ci/linux-4.13
 
 script:
- travis_fold start "build"
+ - echo 'test webgl-stub' && echo -en 'travis_fold:start:build\\r'
  - if [ ${COVERITY_SCAN_BRANCH} != 1 ];
         then ci/build-all-configs.sh;
     fi
- travis_fold end "build"
+ - echo -en 'travis_fold:end:build\\r'
  
 addons:
   coverity_scan:
