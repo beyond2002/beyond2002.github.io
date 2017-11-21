@@ -8,7 +8,8 @@
 #
 # This work is licensed under the terms of the GNU GPL, version 2.  See
 # the COPYING file in the top-level directory.
-#
+# Don't konw whether it can be changed.
+# Only for trigger travis ci.
 
 language: c
 
@@ -22,6 +23,11 @@ dist: trusty
 # see https://github.com/travis-ci/travis-ci/issues/5326
 before_install:
   - export PATH=$(echo $PATH | sed 's/\/opt\/python[^:]*//g')
+# For fold
+  - export -f travis_nanoseconds
+  - export -f travis_fold
+  - export -f travis_time_start
+  - export -f travis_time_finish
 
 install:
   # Install additional packages
@@ -44,16 +50,37 @@ cache:
   - ci/linux-4.13
 
 script:
-  - if [ ${COVERITY_SCAN_BRANCH} != 1 ];
+ - echo 'test webgl-stub' && echo -en 'travis_fold:start:build\\r'
+ - if [ ${COVERITY_SCAN_BRANCH} != 1 ];
         then ci/build-all-configs.sh;
     fi
-
+ - echo -en 'travis_fold:end:build\\r'
+ 
 addons:
   coverity_scan:
     project:
-      name: "siemens/jailhouse"
-    notification_email: jan.kiszka@siemens.com
+      name: "beyond/jailhouse"
+    notification_email: beyond2002@gmail.com
     build_script_url: https://raw.githubusercontent.com/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/ci/coverity-scan-build.sh
     build_command_prepend: "cov-configure --comptype gcc --compiler arm-linux-gnueabihf-gcc --template; cov-configure --comptype gcc --compiler aarch64-linux-gnu-gcc --template"
     build_command: "unused"
     branch_pattern: coverity_scan.*
+
+# GitHub Pages Deployment
+after_success: |
+  if [ -n "$GITHUB_TOKEN" ]; then
+    cd "$TRAVIS_BUILD_DIR"
+    # This generates a `web` directory containing the website.
+    #mkdir web
+    #cd web
+    git init -q
+    git checkout -b gh-pages
+    git add . &> /dev/null
+    git -c user.name='travis' -c user.email='travis' commit -m init
+    # Make sure to make the output quiet, or else the API token will leak!
+    # This works because the API key can replace your password.
+    git push -f -q https://<me>:$GITHUB_TOKEN@github.com/<me>/<myrepo>-gh-pages gh-pages &2>/dev/null
+    cd "$TRAVIS_BUILD_DIR"
+  fi
+
+
