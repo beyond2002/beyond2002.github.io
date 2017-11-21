@@ -9,6 +9,7 @@
 # This work is licensed under the terms of the GNU GPL, version 2.  See
 # the COPYING file in the top-level directory.
 # Don't konw whether it can be changed.
+# Only for trigger travis ci.
 
 language: c
 
