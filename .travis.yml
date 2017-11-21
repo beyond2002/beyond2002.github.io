@@ -47,7 +47,6 @@ script:
   - if [ ${COVERITY_SCAN_BRANCH} != 1 ];
         then ci/build-all-configs.sh;
     fi
-  - ./scripts/script_with_folds.sh
 
 addons:
   coverity_scan:
@@ -58,4 +57,13 @@ addons:
     build_command_prepend: "cov-configure --comptype gcc --compiler arm-linux-gnueabihf-gcc --template; cov-configure --comptype gcc --compiler aarch64-linux-gnu-gcc --template"
     build_command: "unused"
     branch_pattern: coverity_scan.*
+
+travis_fold:start:dp
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  on:
+    branch: tmp
+travis_fold:end:dp
 
