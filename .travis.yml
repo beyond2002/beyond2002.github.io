@@ -1,0 +1,77 @@
+#
+# Jailhouse, a Linux-based partitioning hypervisor
+#
+# Copyright (c) Siemens AG, 2014-2016
+#
+# Authors:
+#  Jan Kiszka <jan.kiszka@siemens.com>
+#
+# This work is licensed under the terms of the GNU GPL, version 2.  See
+# the COPYING file in the top-level directory.
+# Don't konw whether it can be changed.
+# Only for trigger travis ci.
+
+language: c
+
+compiler:
+  - gcc
+
+sudo: required
+dist: trusty
+
+# Remove bogus python installations from PATH,
+# see https://github.com/travis-ci/travis-ci/issues/5326
+before_install:
+  - export PATH=$(echo $PATH | sed 's/\/opt\/python[^:]*//g')
+# For fold
+  - export -f travis_nanoseconds
+  - export -f travis_fold
+  - export -f travis_time_start
+  - export -f travis_time_finish
+
+install:
+  # Install additional packages
+  - sudo apt-add-repository 'deb http://archive.ubuntu.com/ubuntu xenial main'
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq python-mako gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu make
+  # Update scan.coverity.com certificate
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
+  # Install kernel build environment if it's not in the cache
+  - if [ ! -L ci/linux ]; then
+        pushd ci;
+        wget http://www.kiszka.org/downloads/travis-ci/kernel-build.tar.xz;
+        tar xJf kernel-build.tar.xz;
+        popd;
+    fi
+
+cache:
+  directories:
+  - ci/linux
+  - ci/linux-4.13
+
+script:
+ - echo 'test webgl-stub' && echo -en 'travis_fold:start:build\\r'
+ - if [ ${COVERITY_SCAN_BRANCH} != 1 ];
+        then ci/build-all-configs.sh;
+    fi
+ - echo -en 'travis_fold:end:build\\r'
+ 
+addons:
+  coverity_scan:
+    project:
+      name: "beyond/jailhouse"
+    notification_email: beyond2002@gmail.com
+    build_script_url: https://raw.githubusercontent.com/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/ci/coverity-scan-build.sh
+    build_command_prepend: "cov-configure --comptype gcc --compiler arm-linux-gnueabihf-gcc --template; cov-configure --comptype gcc --compiler aarch64-linux-gnu-gcc --template"
+    build_command: "unused"
+    branch_pattern: coverity_scan.*
+
+# GitHub Pages Deployment
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  on:
+    branch: tmp
+
+
