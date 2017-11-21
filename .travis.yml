@@ -23,6 +23,11 @@ dist: trusty
 # see https://github.com/travis-ci/travis-ci/issues/5326
 before_install:
   - export PATH=$(echo $PATH | sed 's/\/opt\/python[^:]*//g')
+# For fold
+  - export -f travis_nanoseconds
+  - export -f travis_fold
+  - export -f travis_time_start
+  - export -f travis_time_finish
 
 install:
   # Install additional packages
@@ -59,16 +64,9 @@ addons:
     build_command: "unused"
     branch_pattern: coverity_scan.*
 
-script:
-  - echo 'deployPending' && echo -en 'travis_fold:start:script.deployPending\\r'
-  travis_time_start
 deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
-  on:
-    branch: tmp
-  travis_time_finish
-script:
-  - echo -en 'travis_fold:end:script.deployPending\\r'
+  - provider: script
+    on:
+      branch: tmp
+    script: $TRAVIS_BUILD_DIR/deploy.sh
 
