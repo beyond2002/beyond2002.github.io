@@ -65,8 +65,10 @@ addons:
     branch_pattern: coverity_scan.*
 
 deploy:
-  - provider: script
-    on:
-      branch: tmp
-    script: $TRAVIS_BUILD_DIR/deploy.sh
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  on:
+    branch: tmp
+
 
