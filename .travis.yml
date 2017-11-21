@@ -59,7 +59,7 @@ addons:
     build_command: "unused"
     branch_pattern: coverity_scan.*
 
-travis_fold start "deploy.part1"
+travis_fold:start:"deploy.part1"
   travis_time_start
 deploy:
   provider: pages
@@ -68,5 +68,5 @@ deploy:
   on:
     branch: tmp
   travis_time_finish
-travis_fold end "deploy.part1" 
+travis_fold:end:"deploy.part1" 
 
